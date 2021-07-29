@@ -1,287 +1,323 @@
-/**
- * @grid
- * @name Grid
- * @description A responsive CSS grid.
- */
 
-@import "imports/utils.less";
-@import "imports/grid-flex-config.less";
-@import "imports/grid-flex-mixins.less";
+@fs-grid-mixin-only:      false;
 
-// !Reset Box-sizing
+@fs-grid-class-container: fs-grid;
+@fs-grid-class-row:       fs-row;
+@fs-grid-class-cell:      fs-cell;
+  @fs-grid-class-contained: -contained;
+  @fs-grid-class-padded:    -padded;
+  @fs-grid-class-first:     -first;
+  @fs-grid-class-last:      -last;
 
-* {
-  box-sizing: border-box;
+@fs-grid-class-all:       fs-all;
+@fs-grid-class-xs:        fs-xs;
+@fs-grid-class-sm:        fs-sm;
+@fs-grid-class-md:        fs-md;
+@fs-grid-class-lg:        fs-lg;
+@fs-grid-class-xl:        fs-xl;
 
-  &:before,
-  &:after {
-    box-sizing: inherit;
-  }
+@fs-grid-columns-sm:      3;
+@fs-grid-columns-md:      6;
+@fs-grid-columns-lg:      12;
+
+@fs-grid-gap:             20px;
+  @fs-grid-gutter:          1.0416666666666667%;
+
+@fs-grid-width-xs:        300px;
+@fs-grid-width-sm:        480px;
+@fs-grid-width-md:        720px;
+@fs-grid-width-lg:        960px;
+@fs-grid-width-xl:        1200px;
+
+@fs-grid-width-break-xs:  320px;
+@fs-grid-width-break-sm:  500px;
+@fs-grid-width-break-md:  740px;
+@fs-grid-width-break-lg:  980px;
+@fs-grid-width-break-xl:  1220px;
+
+@fs-grid-mq-max-sm:       ~"max-width: "(@fs-grid-width-break-sm - 1px);
+@fs-grid-mq-max-md:       ~"max-width: "(@fs-grid-width-break-md - 1px);
+@fs-grid-mq-max-lg:       ~"max-width: "(@fs-grid-width-break-lg - 1px);
+@fs-grid-mq-max-xl:       ~"max-width: "(@fs-grid-width-break-xl - 1px);
+
+@fs-grid-mq-min-sm:       ~"min-width: "(@fs-grid-width-break-sm);
+@fs-grid-mq-min-md:       ~"min-width: "(@fs-grid-width-break-md);
+@fs-grid-mq-min-lg:       ~"min-width: "(@fs-grid-width-break-lg);
+@fs-grid-mq-min-xl:       ~"min-width: "(@fs-grid-width-break-xl);
+
+
+//-- Base
+
+.@{fs-grid-class-container} {
+  --fs-col-count: @fs-grid-columns-sm;
+  --fs-col-start: 1;
+  --fs-col-end: var(--fs-col-count);
+  // --fs-gap: @fs-grid-gap;
 }
 
-& when not (@fs-grid-mixin-only) {
-  .@{fs-grid-class-container} {
+//-- GRID
 
-    .@{fs-grid-class-row} {
+.@{fs-grid-class-row} {
+  display: grid;
+  grid-gap: var(--fs-gap);
+  grid-template-columns: repeat(var(--fs-col-count), 1fr);
 
-      &:extend(.fs_grid_row all);
+  //
 
-      .@{fs-grid-class-row} {
-        &:extend(.fs_grid_row_row all);
+  > .@{fs-grid-class-cell} {
+    min-width: 0;
+    grid-column-end: span var(--fs-col-end);
+  }
+
+}
+
+
+//-- SIZES
+
+// All
+
+.fs_grid_row(@fs-grid-class-all, 0);
+
+// SM
+
+@media (@fs-grid-mq-max-md) {
+
+  .fs_grid_row(@fs-grid-class-sm, @fs-grid-columns-sm);
+
+  .fs_grid_builder(@fs-grid-class-sm, @fs-grid-columns-sm);
+}
+
+// XS
+
+@media (@fs-grid-mq-max-sm) {
+
+  .fs_grid_row(@fs-grid-class-xs, @fs-grid-columns-sm);
+
+  .fs_grid_builder(@fs-grid-class-xs, @fs-grid-columns-sm);
+}
+
+// MD
+
+@media (@fs-grid-mq-min-md) and (@fs-grid-mq-max-lg) {
+
+  .fs_grid_row(@fs-grid-class-md, @fs-grid-columns-md);
+
+  .fs_grid_builder(@fs-grid-class-md, @fs-grid-columns-md);
+}
+
+// LG
+
+@media (@fs-grid-mq-min-lg) {
+
+  .fs_grid_row(@fs-grid-class-lg, @fs-grid-columns-lg);
+
+  .fs_grid_builder(@fs-grid-class-lg, @fs-grid-columns-lg);
+}
+
+// XL
+
+@media (@fs-grid-mq-min-lg) {
+
+  .fs_grid_row(@fs-grid-class-xl, @fs-grid-columns-lg);
+
+  .fs_grid_builder(@fs-grid-class-xl, @fs-grid-columns-lg);
+}
+
+
+//-- MIXINS
+
+//-- Row
+
+.fs_grid_row(@size_class, @column_count) {
+
+  .@{fs-grid-class-row} {
+
+    & when (@column_count > 0) {
+      --fs-col-count: @column_count;
+      --fs-col-end: @column_count;
+      // --fs-col-end: abs(@column_count + 1);
+
+      > [class*="@{size_class}-from-"] {
+      // > [class*="@{cell_class}-place"] {
+        grid-column-start: var(--fs-col-start);
+        grid-column-end: var(--fs-col-end);
       }
-
-      [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-contained}"] .@{fs-grid-class-row} {
-        &:extend(.fs_grid_row_row_contained);
-      }
-
-      // !All Cells
-      [class*="@{fs-grid-class-cell}"] {
-        &:extend(.fs_grid_cell);
-      }
-
-      // !Padded Cells
-      [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-padded}"] {
-        &:extend(.fs_grid_cell_padded);
-      }
-
-      // !Contained Cells
-      [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-contained}"] {
-        &:extend(.fs_grid_cell_contained);
-      }
-
-      // // !First Cells
-      // [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-first}"] {
-      //   &:extend(.fs_grid_cell_first);
-      // }
-      //
-      // // !Last Cells
-      // [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-last}"] {
-      //   &:extend(.fs_grid_cell_last);
-      // }
-
-      // !All Sizes
-      .fs_grid(@fs-grid-class-all, 0);
-
-      // !Small, 540 (max 740)
-      @media screen and (@fs-grid-mq-max-md) {
-        .fs_grid(@fs-grid-class-sm, @fs-grid-columns-sm);
-      }
-
-      // !Min, 300 (max 500)
-      @media screen and (@fs-grid-mq-max-sm) {
-        .fs_grid(@fs-grid-class-xs, @fs-grid-columns-sm);
-      }
-
-      // !Medium, 6 column, 720 (min 740)
-      @media screen and (@fs-grid-mq-min-md) and (@fs-grid-mq-max-lg) {
-        .fs_grid(@fs-grid-class-md, @fs-grid-columns-md);
-      }
-
-      // !Large, 12 column, 960 (min 980)
-      @media screen and (@fs-grid-mq-min-lg) {
-        .fs_grid(@fs-grid-class-lg, @fs-grid-columns-lg);
-      }
-
-      // !XLarge, 12 column, 1200 (min 1220)
-      @media screen and (@fs-grid-mq-min-xl) {
-        .fs_grid(@fs-grid-class-xl, @fs-grid-columns-lg);
-      }
     }
 
-    // !Full Fluid Grid
-    &-fluid .@{fs-grid-class-row} {
-      &:extend(.fs_grid_row_fluid);
+    // Row Alignment
+
+    &.@{size_class}-align-center {
+      align-items: center;
     }
 
-    // !Full Adaptive Grid
-    &-adaptive .@{fs-grid-class-row} {
-      &:extend(.fs_grid_row_adaptive);
+    &.@{size_class}-align-start {
+      align-items: start;
+    }
+
+    &.@{size_class}-align-end {
+      align-items: end;
+    }
+
+    // Row Justify
+
+    &.@{size_class}-justify-center {
+      justify-items: center;
+    }
+
+    &.@{size_class}-justify-start {
+      justify-items: start;
+    }
+
+    &.@{size_class}-justify-end {
+      justify-items: end;
     }
   }
-}
 
-// !Size Based Mixins
+  .@{fs-grid-class-cell} {
+    // Cell Order
 
-.fs_row() {
-  &:extend(.fs_grid_row all);
-}
-
-.fs_row_row() {
-  &:extend(.fs_grid_row_row all);
-}
-
-.fs_row_row_contained() {
-  &:extend(.fs_grid_row_row_contained all);
-}
-
-.fs_row_fluid() {
-  &:extend(.fs_grid_row_fluid);
-}
-
-.fs_row_fluid_sm() {
-  &:extend(.fs_grid_row_fluid);
-}
-
-.fs_cell() {
-  &:extend(.fs_grid_cell);
-}
-
-.fs_cell_padded() {
-  &:extend(.fs_grid_cell);
-  &:extend(.fs_grid_cell_padded);
-}
-
-.fs_cell_contained() {
-  &:extend(.fs_grid_cell);
-  &:extend(.fs_grid_cell_contained);
-}
-
-// !Small, 540 (max 740)
-.fs_cell_xs(@count, @total:0) {
-
-  @media screen and (@fs-grid-mq-max-sm) {
-
-    & when (@total = 0) {
-      .fs_grid_column(@fs-grid-columns-sm, @fs-grid-gutter, @count);
+    &.@{size_class}@{fs-grid-class-first} {
+      order: -1;
     }
 
-    & when not (@total = 0) {
-      .fs_grid_column(@total, @fs-grid-gutter, @count);
+    &.@{size_class}@{fs-grid-class-last} {
+      order: 1;
+    }
+
+    // Cell Alignment
+
+    &.@{size_class}-align-center {
+      align-self: center;
+    }
+
+    &.@{size_class}-align-start {
+      align-self: start;
+    }
+
+    &.@{size_class}-align-end {
+      align-self: end;
+    }
+
+    // Cell Justify
+
+    &.@{size_class}-justify-center {
+      justify-self: center;
+    }
+
+    &.@{size_class}-justify-start {
+      justify-self: start;
+    }
+
+    &.@{size_class}-justify-end {
+      justify-self: end;
     }
   }
+
 }
 
-// Push
-.fs_push_xs(@count, @total:0) {
 
-  @media screen and (@fs-grid-mq-max-sm) {
+//-- Grid Builder
 
-    & when (@total = 0) {
-      .fs_grid_column_pushed(@fs-grid-columns-sm, @fs-grid-gutter, @count);
-    }
+.fs_grid_builder(@class, @columns, @current:1) {
+  // @total: total column count
+  // @current: current column width
 
-    & when not (@total = 0) {
-      .fs_grid_column_pushed(@total, @fs-grid-gutter, @count);
-    }
-  }
+  // @total: (@columns * 2);
+  @total: @columns;
+
+  .fs_grid_rows(@class, @total);
+
+  .fs_grid_columns_base(@class, @total, @current); // generate base
+
+  .fs_grid_columns_from(@class, @total, @current); // generate from
+
+  .fs_grid_columns_to(@class, @total, @current); // generate to
+
+  .fs_grid_columns_span(@class, @total, @current); // generate span
 }
 
-// !Min, 300 (max 500)
-.fs_cell_sm(@count, @total:0) {
 
-  @media screen and (@fs-grid-mq-max-md) {
+//-- Row Counts
 
-    & when (@total = 0) {
-      .fs_grid_column(@fs-grid-columns-sm, @fs-grid-gutter, @count);
-    }
+.fs_grid_rows(@class, @total, @current:1) when (@current <= @total) {
 
-    & when not (@total = 0) {
-      .fs_grid_column(@total, @fs-grid-gutter, @count);
-    }
+  .@{fs-grid-class-row}.@{class}-@{current} {
+    --fs-col-count: @current;
+    // --fs-col-end: @current;
+    --fs-col-end: abs(@current + 1);
   }
+
+  .fs_grid_rows(@class, @total, (@current + 1));
 }
 
-// Push
-.fs_push_sm(@count, @total:0) {
 
-  @media screen and (@fs-grid-mq-max-md) {
+//-- Base Columns
 
-    & when (@total = 0) {
-      .fs_grid_column_pushed(@fs-grid-columns-sm, @fs-grid-gutter, @count);
-    }
+.fs_grid_columns_base(@class, @total, @current:1) when (@current <= @total) {
 
-    & when not (@total = 0) {
-      .fs_grid_column_pushed(@total, @fs-grid-gutter, @count);
-    }
+  .@{fs-grid-class-cell}.@{class}-@{current} {
+    --fs-col-end: @current;
   }
+
+  .fs_grid_columns_base(@class, @total, (@current + 1));
 }
 
-// !Medium, 6 column, 720 (min 740)
-.fs_cell_md(@count, @total:0) {
 
-  @media screen and (@fs-grid-mq-min-md) and (@fs-grid-mq-max-lg) {
+//-- 'From' Columns (from-x)
 
-    & when (@total = 0) {
-      .fs_grid_column(@fs-grid-columns-md, @fs-grid-gutter, @count);
-    }
+.fs_grid_columns_from(@class, @total, @current:1) when (@current <= @total) {
 
-    & when not (@total = 0) {
-      .fs_grid_column(@total, @fs-grid-gutter, @count);
-    }
+  [class*="@{class}-from-@{current}-"] {
+    --fs-col-start: @current;
   }
+
+  .fs_grid_columns_from(@class, @total, (@current + 1)); // loop
 }
 
-// Push
-.fs_push_md(@count, @total:0) {
 
-  @media screen and (@fs-grid-mq-min-md) and (@fs-grid-mq-max-lg) {
+//-- 'To' Columns (from-x-to-x)
 
-    & when (@total = 0) {
-      .fs_grid_column_pushed(@fs-grid-columns-md, @fs-grid-gutter, @count);
-    }
+.fs_grid_columns_to(@class, @total, @current:1) when (@current <= @total) {
+  // @total: total column width
+  // @current: current column offset
 
-    & when not (@total = 0) {
-      .fs_grid_column_pushed(@total, @fs-grid-gutter, @count);
-    }
-  }
+  .fs_grid_columns_to_loop(@class, @total, @current); // generate groups
+
+  .fs_grid_columns_to(@class, (@total - 1), 1); // loop
 }
 
-// !Large, 12 column, 960 (min 980)
-.fs_cell_lg(@count, @total:0) {
+.fs_grid_columns_to_loop(@class, @max, @current:1) when (@current <= @max) {
 
-  @media screen and (@fs-grid-mq-min-lg) {
-
-    & when (@total = 0) {
-      .fs_grid_column(@fs-grid-columns-lg, @fs-grid-gutter, @count);
-    }
-
-    & when not (@total = 0) {
-      .fs_grid_column(@total, @fs-grid-gutter, @count);
-    }
+  .@{fs-grid-class-cell}.@{class}-from-@{current}-to-@{max} {
+    // --fs-col-end: @max;
+    --fs-col-end: abs(@max + 1);
   }
+
+  .fs_grid_columns_to_loop(@class, @max, (@current + 1)); // loop
 }
 
-// Push
-.fs_push_lg(@count, @total:0) {
 
-  @media screen and (@fs-grid-mq-min-lg) {
+//-- 'Span' Columns (from-x-span-x)
 
-    & when (@total = 0) {
-      .fs_grid_column_pushed(@fs-grid-columns-lg, @fs-grid-gutter, @count);
-    }
+.fs_grid_columns_span(@class, @total, @current:1) when (@current <= @total) {
+  // @total: total column width
+  // @current: current column offset
 
-    & when not (@total = 0) {
-      .fs_grid_column_pushed(@total, @fs-grid-gutter, @count);
-    }
-  }
+  @max: (@total - (@current - 1));
+
+  .fs_grid_columns_span_loop(@class, @total, @max, 1); // generate groups
+
+  .fs_grid_columns_span(@class, @total, (@current + 1)); // loop
 }
 
-// !XLarge, 12 column, 1200 (min 1220)
-.fs_cell_xl(@count, @total:0) {
+.fs_grid_columns_span_loop(@class, @total, @max, @current:1) when ((@current + @max - 1) <= @total) {
+  // @total: total column width
+  // @max: max span width
+  // @current: current column offset
 
-  @media screen and (@fs-grid-mq-min-xl) {
-
-    & when (@total = 0) {
-      .fs_grid_column(@fs-grid-columns-lg, @fs-grid-gutter, @count);
-    }
-
-    & when not (@total = 0) {
-      .fs_grid_column(@total, @fs-grid-gutter, @count);
-    }
+  .@{fs-grid-class-cell}.@{class}-from-@{current}-span-@{max} {
+    --fs-col-end: span @max;
   }
-}
 
-// Push
-.fs_push_xl(@count, @total:0) {
-
-  @media screen and (@fs-grid-mq-min-xl) {
-
-    & when (@total = 0) {
-      .fs_grid_column_pushed(@fs-grid-columns-lg, @fs-grid-gutter, @count);
-    }
-
-    & when not (@total = 0) {
-      .fs_grid_column_pushed(@total, @fs-grid-gutter, @count);
-    }
-  }
+  .fs_grid_columns_span_loop(@class, @total, @max, (@current + 1)); // loop
 }
